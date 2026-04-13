@@ -9,7 +9,12 @@ const CreateNew = ({ addAnecdote }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    addAnecdote({ content, author, info, votes: 0 })
+    addAnecdote({ 
+      content: content.bind.value, 
+      author: author.bind.value, 
+      info: info.bind.value, 
+      votes: 0 
+    })
     navigate('/')
   }
 
@@ -23,21 +28,21 @@ const CreateNew = ({ addAnecdote }) => {
   return (
     <div>
       <h2>create a new anecdote</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} onReset={handleReset}>
         <div>
           content
-          <input {...content} />
+          <input {...content.bind} />
         </div>
         <div>
           author
-          <input {...author} />
+          <input {...author.bind} />
         </div>
         <div>
           url for more info
-          <input {...info} />
+          <input {...info.bind} />
         </div>
         <button>create</button>
-        <button onClick={handleReset}>reset</button>
+        <button type='reset'>reset</button>
       </form>
     </div>
   )
