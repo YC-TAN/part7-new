@@ -23,4 +23,10 @@ const createNew = async (object) => {
   })
 }
 
-export default { getAll, createNew }
+const remove = async(id) => {
+  return await service(`${baseUrl}/${id}`, {
+    method: 'DELETE'
+  })
+}
+
+export default { getAll, createNew, remove }
