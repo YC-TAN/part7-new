@@ -109,6 +109,7 @@ const App = () => {
   const loginForm = () => {
     return (
       <Togglable buttonLabel="login">
+        <Notification message={message} />
         <LoginForm login={handleLogin} />
       </Togglable>
     )
@@ -129,7 +130,7 @@ const App = () => {
       </Togglable>
 
       {blogs.toSorted((a, b) => b.likes - a.likes).map((blog) => (
-        <Blog key={blog.id} blog={blog} addLike={handleLike} deleteBlog={handleDelete}/>
+        <Blog key={blog.id} blog={blog} addLike={handleLike} deleteBlog={handleDelete} user={user}/>
       ))}
     </div>
   )
