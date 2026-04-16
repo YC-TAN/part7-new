@@ -11,7 +11,8 @@
     "dev": "cross-env NODE_ENV=development node --watch index.js",
     "test": "cross-env  NODE_ENV=test node --test",
     "test:conc": "cross-env  NODE_ENV=test node --test-concurrency=1 --test",
-    "test:only": "cross-env  NODE_ENV=test node --test-only --test"
+    "test:only": "cross-env  NODE_ENV=test node --test-only --test",
+    "start:test": "cross-env NODE_ENV=test node --watch index.js"  
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

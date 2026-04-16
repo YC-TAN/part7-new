@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
+import { Routes, Route, Link, useMatch } from 'react-router-dom'
+
+import BlogList from './components/BlogList'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
 import LoginForm from './components/LoginForm'
 import BlogForm from './components/BlogForm'
-import Togglable from './components/Togglable'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
@@ -11,7 +13,6 @@ const App = () => {
   const [blogs, setBlogs] = useState([])
   const [message, setMessage] = useState(null)
   const [user, setUser] = useState(null)
-  const blogFormRef = useRef()
 
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs))
@@ -25,6 +26,11 @@ const App = () => {
       blogService.setToken(user.token)
     }
   }, [])
+
+  const match = useMatch('/blogs/:id')
+  const blog = match
+    ? blogs.find( b => b.id === match.params.id)
+    :null
 
   const handleLogin = async (username, password) => {
     try {
@@ -57,7 +63,6 @@ const App = () => {
   const handleAddBlog = async (newBlog) => {
     try {
       const blog = await blogService.create(newBlog)
-      blogFormRef.current.toggleVisibility()
       setBlogs((prev) => prev.concat(blog))
       setMessage(`a new blog ${blog.title} by ${blog.author} added`)
       setTimeout(() => {
@@ -92,7 +97,7 @@ const App = () => {
   const handleDelete = async (blog) => {
     try {
       await blogService.remove(blog.id)
-      setBlogs((prev) => prev.filter((b) => (b.id !== blog.id)))
+      setBlogs((prev) => prev.filter((b) => b.id !== blog.id))
       setMessage(`deleted ${blog.title} by ${blog.author}`)
       setTimeout(() => {
         setMessage(null)
@@ -106,32 +111,47 @@ const App = () => {
     }
   }
 
-  const loginForm = () => {
-    return (
-      <Togglable buttonLabel="login">
-        <Notification message={message} />
-        <LoginForm login={handleLogin} />
-      </Togglable>
-    )
+  const padding = {
+    padding: 5,
   }
-
-  if (!user) return loginForm()
-
   return (
     <div>
-      <Notification message={message} />
-      <h2>blogs</h2>
-      <p>
-        {user.name} logged in
-        <button onClick={handleLogout}>logout</button>
-      </p>
-      <Togglable buttonLabel="create new blog" ref={blogFormRef}>
-        <BlogForm createBlog={handleAddBlog} />
-      </Togglable>
-
-      {blogs.toSorted((a, b) => b.likes - a.likes).map((blog) => (
-        <Blog key={blog.id} blog={blog} addLike={handleLike} deleteBlog={handleDelete} user={user}/>
-      ))}
+      <div>
+        <Link style={padding} to="/">
+          blogs
+        </Link>
+        {user ? (
+          <>
+            <Link style={padding} to="/new">
+              New Blog
+            </Link>
+            <button onClick={handleLogout}>logout</button>
+          </>
+        ) : (
+          <Link style={padding} to="/login">
+            login
+          </Link>
+        )}
+      </div>
+      <Routes>
+        <Route
+          path="/"
+          element={<BlogList blogs={blogs} message={message} user={user} />}
+        />
+        <Route path="/login" element={<LoginForm login={handleLogin} />} />
+        <Route
+          path="/blogs/:id"
+          element={
+            <Blog
+              blog={blog}
+              addLike={handleLike}
+              deleteBlog={handleDelete}
+              user={user}
+            />
+          }
+        ></Route>
+        <Route path="/new" element={<BlogForm createBlog={handleAddBlog} />} />
+      </Routes>
     </div>
   )
 }

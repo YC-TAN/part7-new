@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { BrowserRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import Blog from "./Blog";
 
@@ -10,45 +11,45 @@ beforeEach(() => {
     url: "some url",
     author: "author",
     likes: 15,
+    user: {
+      username: "creator_user",
+      name: "The Creator",
+      id: "user_id_1",
+    },
   };
 });
 
+const renderWithRouter = (ui) => {
+  return render(<BrowserRouter>{ui}</BrowserRouter>);
+};
+
 test("renders blog", () => {
-  render(<Blog blog={blog} />);
+  renderWithRouter(<Blog blog={blog} user={null} />);
 
-  const element = screen.getByText(blog.title, { exact: false });
-  expect(element).toBeDefined();
+  const title = screen.getByText(blog.title, { exact: false });
+  expect(title).toBeDefined();
+  const author = screen.getByText(blog.author, { exact: false });
+  expect(author).toBeDefined();
+  const likes = screen.getByText("likes 15");
+  expect(likes).toBeDefined();
+  expect(screen.queryByRole("button", { name: /like/i })).toBeNull();
+  expect(screen.queryByRole("button", { name: /remove/i })).toBeNull();
 });
 
-test("hides url and numbers of likes on first render", () => {
-  const { container } = render(<Blog blog={blog} />);
+test("authenticated non-creator sees only the like button", () => {
+  const nonCreator = { username: "other_user", id: "user_id_2" };
 
-  // Find the div by its class
-  const detailsDiv = container.querySelector(".content");
-  expect(detailsDiv).not.toBeVisible();
+  renderWithRouter(<Blog blog={blog} user={nonCreator} />);
+
+  expect(screen.getByRole("button", { name: /like/i })).toBeDefined();
+  expect(screen.queryByRole("button", { name: /remove/i })).toBeNull();
 });
 
-test("clicking view button shows likes and url", async () => {
-  render(<Blog blog={blog} />);
+test("creator sees both like and remove buttons", () => {
+  const creator = { username: "creator_user", id: "user_id_1" };
 
-  const user = userEvent.setup();
-  const button = screen.getByText("view");
-  await user.click(button);
-  const likeButton = screen.getByRole("button", { name: /like/i });
-  expect(likeButton).toBeDefined();
-});
+  renderWithRouter(<Blog blog={blog} user={creator} />);
 
-test("one click on like button calls event handler once", async () => {
-  const mockHandler = vi.fn();
-
-  render(<Blog blog={blog} addLike={mockHandler} />);
-
-  const user = userEvent.setup();
-  const button = screen.getByText("view");
-  await user.click(button);
-  const likeButton = screen.getByText("like");
-  await user.click(likeButton);
-  expect(mockHandler.mock.calls).toHaveLength(1);
-  await user.click(likeButton);
-  expect(mockHandler.mock.calls).toHaveLength(2);
+  expect(screen.getByRole("button", { name: /like/i })).toBeDefined();
+  expect(screen.getByRole("button", { name: /remove/i })).toBeDefined();
 });

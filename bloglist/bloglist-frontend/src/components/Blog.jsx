@@ -1,20 +1,11 @@
-import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const Blog = ({ blog, addLike, deleteBlog, user }) => {
-  const [visible, setVisible] = useState(false)
-
-  const hideWhenVisible = { display: visible ? 'none' : '' }
-  const showWhenVisible = { display: visible ? '' : 'none' }
-
-  const toggleVisibility = () => {
-    setVisible(!visible)
-  }
+  const nav = useNavigate()
 
   const blogStyle = {
     paddingTop: 10,
     paddingLeft: 2,
-    border: 'solid',
-    borderWidth: 1,
     marginBottom: 5,
   }
 
@@ -27,29 +18,30 @@ const Blog = ({ blog, addLike, deleteBlog, user }) => {
   }
 
   const onDelete = () => {
-    deleteBlog(blog)
+    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
+      deleteBlog(blog)
+      nav('/')
+    }
   }
 
-  const showRemoveButton = user?.username === blog.user?.username || user?.id === blog.user?.id
+  const showRemoveButton =
+    user?.username === blog.user?.username || user?.id === blog.user?.id
+
+  if (!blog) {
+    return null
+  }
 
   return (
-    <div className='blog' style={blogStyle}>
+    <div className="blog" style={blogStyle}>
+      <h1>
+        {blog.author}: {blog.title}
+      </h1>
+      <div>{blog.url}</div>
       <div>
-        {blog.title} {blog.author}{' '}
-        <span style={visible ? showWhenVisible : hideWhenVisible}>
-          <button onClick={toggleVisibility}>
-            {visible ? 'hide' : 'view'}
-          </button>
-        </span>
-        <div className="content" style={showWhenVisible}>
-          <div>{blog.url}</div>
-          <div>
-            likes {blog.likes} <button onClick={onLike}>like</button>
-          </div>
-          <div>{blog.user?.name}</div>
-          {showRemoveButton && <button onClick={onDelete}>remove</button>}
-        </div>
+        likes {blog.likes} {user && <button onClick={onLike}>like</button>}
       </div>
+      <div>Added by {blog.user?.name}</div>
+      {showRemoveButton && <button onClick={onDelete}>remove</button>}
     </div>
   )
 }

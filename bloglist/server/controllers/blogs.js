@@ -50,7 +50,7 @@ blogsRouter.delete('/:id', userExtractor, async (request, response) => {
     return response.status(204).end()
 })
 
-blogsRouter.put('/:id', async (request, response) => {
+blogsRouter.put('/:id', userExtractor, async (request, response) => {
   const { likes } = request.body
 
   const blog = await Blog.findById(request.params.id)
