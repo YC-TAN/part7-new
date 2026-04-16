@@ -1,34 +1,24 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { TextField, Button } from "@mui/material";
+import { useBlogs } from '../hooks/useBlogs'
+import useField from "../hooks/useField";
 
-const BlogForm = ({ createBlog }) => {
-  const [newBlog, setNewBlog] = useState({
-    title: "",
-    author: "",
-    url: "",
-  });
-
+const BlogForm = () => {
+  const { addBlog } = useBlogs()
   const nav = useNavigate();
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-
-    setNewBlog({
-      ...newBlog,
-      [name]: value,
-    });
-  };
+  const title = useField('text')
+  const author = useField('text')
+  const url = useField('text')
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    createBlog(newBlog);
-    nav("/");
-    setNewBlog({
-      title: "",
-      author: "",
-      url: "",
+    addBlog({
+        title: title.value,
+        author: author.value,
+        url: url.value
     });
+    nav("/");
+    e.target.reset();
   };
 
   return (
@@ -38,26 +28,20 @@ const BlogForm = ({ createBlog }) => {
         <div>
           <TextField
             label="title "
-            name="title"
-            value={newBlog.title}
-            onChange={handleChange}
+            {...title}
           />
         </div>
         <div>
           <TextField
             label="author "
-            name="author"
-            value={newBlog.author}
-            onChange={handleChange}
+            {...author}
           />
         </div>
 
         <div>
           <TextField
             label="url "
-            name="url"
-            value={newBlog.url}
-            onChange={handleChange}
+            {...url}
           />
         </div>
         <Button type="submit" variant="contained" style={{ marginTop: 10 }}>

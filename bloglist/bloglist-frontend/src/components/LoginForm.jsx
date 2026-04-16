@@ -1,16 +1,21 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUserActions } from "../store/user";
+import useField from "../hooks/useField";
 
-const LoginForm = ({ login }) => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+const LoginForm = () => {
+  const { login } = useUserActions();
+  const username = useField("text");
+  const password = useField("password");
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    login(username, password);
-    setUsername("");
-    setPassword("");
+    login({
+      username: username.value,
+      password: password.value,
+    });
+    e.target.reset();
     navigate("/");
   };
 
@@ -21,21 +26,13 @@ const LoginForm = ({ login }) => {
         <div>
           <label>
             username
-            <input
-              type="text"
-              value={username}
-              onChange={({ target }) => setUsername(target.value)}
-            />
+            <input {...username} />
           </label>
         </div>
         <div>
           <label>
             password
-            <input
-              type="password"
-              value={password}
-              onChange={({ target }) => setPassword(target.value)}
-            />
+            <input {...password} />
           </label>
         </div>
         <button type="submit">login</button>

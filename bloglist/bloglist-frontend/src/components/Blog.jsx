@@ -1,6 +1,11 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { useBlogs } from "../hooks/useBlogs";
+import { useUser } from "../store/user";
 
-const Blog = ({ blog, addLike, deleteBlog, user }) => {
+const Blog = () => {
+  const { id } = useParams();
+  const { blog, isPending, like, remove } = useBlogs(id);
+  const user = useUser();
   const nav = useNavigate();
 
   const blogStyle = {
@@ -9,27 +14,20 @@ const Blog = ({ blog, addLike, deleteBlog, user }) => {
     marginBottom: 5,
   };
 
-  const onLike = () => {
-    const updatedBlog = {
-      ...blog,
-      likes: blog.likes + 1,
-    };
-    addLike(updatedBlog);
-  };
+  const onLike = () => like(blog);
 
   const onDelete = () => {
     if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
-      deleteBlog(blog);
+      remove(blog);
       nav("/");
     }
   };
 
-  const showRemoveButton =
-    user?.username === blog.user?.username || user?.id === blog.user?.id;
+  const showRemoveButton = user && 
+    (user.username === blog.user?.username)
 
-  if (!blog) {
-    return null;
-  }
+  if (isPending) return <p>Loading...</p>;
+  if (!blog) return <p>Blog not found!</p>;
 
   return (
     <div className="blog" style={blogStyle}>
