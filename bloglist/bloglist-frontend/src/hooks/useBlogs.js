@@ -51,6 +51,17 @@ export const useBlogs = (id = null) => {
         }
     })
 
+    const commentBlogMutation = useMutation({
+        mutationFn: blogService.comment,
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['blogs']})
+            setNotification(`'comment added`, 'success')
+        },
+        onError: (err) => {
+            setNotification(err.message, 'error')
+        }
+    })
+
     return {
         blog,
         blogs: result.data,
@@ -60,6 +71,7 @@ export const useBlogs = (id = null) => {
             ...blog,
             likes: blog.likes + 1
         }),
-        remove: (blog) => removeBlogMutation.mutate(blog)
+        remove: (blog) => removeBlogMutation.mutate(blog),
+        addComment: (id, comment) => commentBlogMutation.mutate({id, comment})
     }
 }
